@@ -3,8 +3,6 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from face_processing import *
-from iris_processing import *
-from fingerprint_processing import *
 import mysql.connector
 from datetime import datetime
 import speech_recognition as sr
@@ -92,7 +90,7 @@ class BiometryApp(tk.Tk):
         self.resizable(False, False)
 
         # Create instances of different frames
-        for F in (StartPage, Enroll, Auth, Enroll_Means, Auth_Means, VoiceProcessing, Temporary):
+        for F in (StartPage, Enroll, Auth, Enroll_Means, Auth_Means, Temporary):
             if F == Enroll_Means:
                 image_path = getPath("face.jpg")
                 frame = F(container, self, means=fr"{image_path}")
@@ -418,14 +416,7 @@ class Enroll_Means(tk.Frame):
                 # Get the current date and time
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 add_user(complete_name, image_data, None, None, None, current_timestamp) 
-            elif "finger.jpg" in self.mean:
-                enroll_fingerptint()
-            elif "iris.jpg" in self.mean:
-                iris_en = IrisRecognition()
-                iris_en.enroll_iris(filename)
-            elif "voice.jpg" in self.mean:
-                controller.show_frame(VoiceProcessing)
-                
+              
 
 
 # Frame for authentication with specific means (e.g., face, fingerprint, iris)
@@ -489,113 +480,6 @@ class Auth_Means(tk.Frame):
             controller.show_frame(Temporary)
         elif "voice.jpg" in self.mean:
             controller.show_frame(Temporary)
-
-
-# Voice Page  Frame Class
-class VoiceProcessing(tk.Frame):
-    def __init__(self, parent, controller):
-        
-        tk.Frame.__init__(self, parent)
-
-        # Create a progress bar
-        self.recording_progress_bar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=250, mode='indeterminate')
-        # Load background image
-        self.image_original = Image.open(fr"{getPath('voice_page.jpg')}")
-        # Get the size of the original image
-        image_width, image_height = self.image_original.size
-
-        # Create a PhotoImage object from the original image
-        self.image_tk = ImageTk.PhotoImage(self.image_original)
-        name = "Morane Saulnier"
-        self.draw_name(f"{name},", (10,25), "green", ImageFont.truetype("comicbd.ttf", 20))
-        self.draw_name("we'll record you in a moment.", (10,45), "white", ImageFont.truetype("comicbd.ttf", 10))
-
-        # Create a canvas to display the image
-        self.canvas = tk.Canvas(self, width=image_width, height=image_height, bd=0, highlightthickness=0, relief='ridge')
-        self.canvas.grid(sticky='nsew')
-        self.canvas.create_image(0, 0, anchor='nw', image=self.image_tk)
-        self.bind('<Configure>', lambda event, image = self.image_original, canva = self.canvas: controller.show_full_image(event, image, canva))
-        
-        # Language selection label and button
-        self.draw_name("Select a language", (100,100), "white", ImageFont.truetype("calibri.ttf", 50))
-        self.language_var = tk.StringVar()
-         # Define a dictionary to map between language codes and names
-        self.language_dict = {"en-US": "English", "fr-FR": "French", "de-DE": "German", "es-ES": "Spanish", "pt-BR": "Portuguese"}
-        
-        self.language_var = tk.StringVar()
-        self.language_var.set("English")  # Set default language code
-        language_codes = list(self.language_dict.keys())
-        language_names = list(self.language_dict.values())
-
-        self.language_box = ttk.Combobox(self, textvariable=self.language_var, values=language_names)
-        self.language_box.place(x=360, y=215)  # Adjust x and y coordinates as needed
-
-        # Create a reverse dictionary to map back from names to codes
-        self.reverse_language_dict = {v: k for k, v in self.language_dict.items()}
-
-        # Example of how to get the language code when needed
-        self.selected_language_code = self.reverse_language_dict.get(self.language_var.get(), "en-US")
-
-        # Bind the event to the update_language_code function
-        self.language_box.bind("<<ComboboxSelected>>", self.update_language_code)
-
-        # self.draw_name(f"Speak now in {self.language_dict[self.selected_language_code]} langusage.", (100,145), "white", ImageFont.truetype("calibri.ttf", 10))
-        # self.draw_name("Listening...", (100,170), "white", ImageFont.truetype("calibri.ttf", 10))
-
-        # Submit button, centered horizontally
-        button = Button(self, text="Record", command=lambda : self.record_voice(self.selected_language_code), bg="gray", font=("Helvetica", 14, "bold"))
-        button.place(relx=0.5, rely=0.75, anchor='center')
-    
-    def draw_name(self, text, pos, colour,font):
-        # Draw text on the background image
-        self.draw = ImageDraw.Draw(self.image_original)
-        # font = ImageFont.load_default()  # You can change the font as per your requirement
-        point = pos
-        color=colour
-        font=ImageFont.truetype("comicbd.ttf", 20)
-        self.draw.text(point, text, color, font)
-        
-    def update_language_code(self, event):
-        # Update the selected language code when the language selection changes
-        self.selected_language_code = self.reverse_language_dict.get(self.language_var.get(), "en-US")
-        print("Selected Language Code:", self.language_dict[self.selected_language_code])
-
-    def record_voice(self, lang):
-        print("Selected Language :", lang)
-        self.draw_name(f"Speak now in {lang} langusage.", (100,145), "white", ImageFont.truetype("calibri.ttf", 10))
-        self.draw_name("Listening...", (100,170), "white", ImageFont.truetype("calibri.ttf", 10))
-        # self.recording_progress_bar.start()       
-        # Set a flag to indicate that recording is in progress
-        self.recording_in_progress = True
-
-        # Schedule a function to update GUI after a short delay
-        self.after(100, self.delayed_record, lang)
-
-    def delayed_record(self, lang):
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
-
-        # Open the microphone stream
-        with self.microphone as source:
-            # Adjust for ambient noise
-            self.recognizer.adjust_for_ambient_noise(source)
-
-            # Start recording
-            print("listening...")
-            audio = self.recognizer.listen(source)
-            
-            # Try to transcribe the audio
-            try:
-                recognized_text = self.recognizer.recognize_google(audio, language=lang)
-                print(recognized_text)
-                self.draw_name(f"You said:{recognized_text}", (100, 450), "white", ImageFont.truetype("calibri.ttf", 50))
-            except sr.UnknownValueError:
-                print("Google Speech Recognition could not understand audio.")
-                self.draw_name("Google Speech Recognition could not understand audio.", (100, 480), "white", ImageFont.truetype("calibri.ttf", 50))
-            except sr.RequestError as e:
-                print("Could not request results from Google Speech Recognition service")
-                self.draw_name(f"Could not request results from Google Speech Recognition service; {e}", (100, 510), "white", ImageFont.truetype("calibri.ttf", 50))
-        # self.recording_progress_bar.stop()
 
 # Frame for undone functionalities
 class Temporary(tk.Frame):
