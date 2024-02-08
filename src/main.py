@@ -43,7 +43,7 @@ def add_user(complete_name, FacialData, FingerData, IrisData, VoiceData, LastUpd
             connection.close()
 
 # Get image file path relatively
-def getPath(imfile, ipath="interface"):
+def getPath(imfile, ipath="images"):
     # Get the current directory of the script
     current_directory = os.path.dirname(os.path.realpath(__file__))
     # Get the parent directory (one level up)
@@ -83,8 +83,6 @@ class BiometryApp(tk.Tk):
 
         self.frames = {}  # Dictionary to hold different frames
         self.title("Biometric Data Processing")
-        image_path = getPath("icon.ico")
-        self.iconbitmap(fr"{image_path}")
         self.geometry("800x600")
         center(self)
         self.resizable(False, False)
@@ -355,15 +353,15 @@ class Enroll_Means(tk.Frame):
         color="cyan"
         color1 = "red"
 
-        draw.text(point0, "Enrolling you", color, font=ImageFont.truetype("arialbd.ttf", 30))
+        draw.text(point0, "Enrolling you", color, font=ImageFont.load_default())
 
-        draw.text(point1, "Enter your LastName", color0, font=ImageFont.truetype("arial.ttf", 30))
+        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default())
 
         # Entry widget for name, centered horizontally
         Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
         Input1.place(relx=0.5, rely=0.45, anchor='center')
 
-        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.truetype("arial.ttf", 30))
+        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default())
 
         # Entry widget for first name, centered horizontally
         Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
@@ -450,7 +448,7 @@ class Auth_Means(tk.Frame):
         color="cyan"
         color1 = "red"
 
-        draw.text(point0, "Checking on you", color, font=ImageFont.truetype("arialbd.ttf", 30))
+        draw.text(point0, "Checking on you", color, font=ImageFont.load_default())
 
         # Submit button, centered horizontally
         button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
@@ -507,7 +505,7 @@ class Temporary(tk.Frame):
         point0 = 10,40
         color="black"
 
-        draw.text(point0, "Sorry, we're still working on this !", color, font=ImageFont.truetype("arialbd.ttf", 30))
+        draw.text(point0, "Sorry, we're still working on this !", color, font=ImageFont.load_default())
         
         # Submit button, centered horizontally
         button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="white", font=("Helvetica", 14, "bold"),)
