@@ -228,32 +228,8 @@ class Enroll(tk.Frame):
         enroll_face = ImageTk.PhotoImage(file=enroll_image_face)
         face_label = tk.Label(self, image=enroll_face, cursor="hand2")
         face_label.image = enroll_face
-        face_label.place(relx=0.15, rely=0.55)
+        face_label.place(relx=0.5, rely=0.6, anchor='center')
         face_label.bind("<Button-1>", lambda event: controller.show_enroll_means_frame(enroll_image_face))
-
-        image_path = getPath("finger.jpg")
-        enroll_image_finger = fr"{image_path}"
-        enroll_finger = ImageTk.PhotoImage(file=enroll_image_finger)
-        finger_label = tk.Label(self, image=enroll_finger, cursor="hand2")
-        finger_label.image = enroll_finger
-        finger_label.place(relx=0.35, rely=0.55)
-        finger_label.bind("<Button-1>", lambda event: controller.show_enroll_means_frame(enroll_image_finger))
-
-        image_path = getPath("iris.jpg")
-        enroll_image_iris =fr"{image_path}"
-        enroll_iris = ImageTk.PhotoImage(file=enroll_image_iris)
-        iris_label = tk.Label(self, image=enroll_iris, cursor="hand2")
-        iris_label.image = enroll_iris
-        iris_label.place(relx=0.55, rely=0.55)
-        iris_label.bind("<Button-1>", lambda event: controller.show_enroll_means_frame(enroll_image_iris))
-
-        image_path = getPath("voice.jpg")
-        enroll_image_voice = fr"{image_path}"
-        enroll_voice = ImageTk.PhotoImage(file=enroll_image_voice)
-        voice_label = tk.Label(self, image=enroll_voice, cursor="hand2")
-        voice_label.image = enroll_voice
-        voice_label.place(relx=0.75, rely=0.55)
-        voice_label.bind("<Button-1>", lambda event: controller.show_enroll_means_frame(enroll_image_voice))
 
         # Submit button, centered horizontally
         button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="red", font=("Helvetica", 14, "bold"))
@@ -285,29 +261,8 @@ class Auth(tk.Frame):
         enroll_face = ImageTk.PhotoImage(file=enroll_image_face)
         face_label = tk.Label(self, image=enroll_face, cursor="hand2")
         face_label.image = enroll_face
-        face_label.place(relx=0.15, rely=0.55)
+        face_label.place(relx=0.5, rely=0.6, anchor='center')
         face_label.bind("<Button-1>", lambda event: controller.show_auth_means_frame(fr"{getPath('face.jpg')}"))
-
-        enroll_image_finger = fr"{getPath('finger.jpg')}"
-        enroll_finger = ImageTk.PhotoImage(file=enroll_image_finger)
-        finger_label = tk.Label(self, image=enroll_finger, cursor="hand2")
-        finger_label.image = enroll_finger
-        finger_label.place(relx=0.35, rely=0.55)
-        finger_label.bind("<Button-1>", lambda event: controller.show_auth_means_frame(fr"{getPath('finger.jpg')}"))
-
-        enroll_image_iris = fr"{getPath('iris.jpg')}"
-        enroll_iris = ImageTk.PhotoImage(file=enroll_image_iris)
-        iris_label = tk.Label(self, image=enroll_iris, cursor="hand2")
-        iris_label.image = enroll_iris
-        iris_label.place(relx=0.55, rely=0.55)
-        iris_label.bind("<Button-1>", lambda event: controller.show_auth_means_frame(fr"{getPath('iris.jpg')}"))
-
-        enroll_image_voice = fr"{getPath('voice.jpg')}"
-        enroll_voice = ImageTk.PhotoImage(file=enroll_image_voice)
-        voice_label = tk.Label(self, image=enroll_voice, cursor="hand2")
-        voice_label.image = enroll_voice
-        voice_label.place(relx=0.75, rely=0.55)
-        voice_label.bind("<Button-1>", lambda event: controller.show_auth_means_frame(fr"{getPath('voice.jpg')}"))
 
         # Submit button, centered horizontally
         button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="red", font=("Helvetica", 14, "bold"))
@@ -321,7 +276,6 @@ class Enroll_Means(tk.Frame):
     def __init__(self, parent, controller, means):
         tk.Frame.__init__(self, parent)
 
-        
         # Load the background image for the frame
         self.image_original = Image.open(fr"{getPath('enroll_means.jpg')}")
 
@@ -353,15 +307,15 @@ class Enroll_Means(tk.Frame):
         color="cyan"
         color1 = "red"
 
-        draw.text(point0, "Enrolling you", color, font=ImageFont.load_default())
+        draw.text(point0, "Enrolling you", color, font=ImageFont.load_default(20))
 
-        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default())
+        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default(20))
 
         # Entry widget for name, centered horizontally
         Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
         Input1.place(relx=0.5, rely=0.45, anchor='center')
 
-        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default())
+        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default(20))
 
         # Entry widget for first name, centered horizontally
         Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
@@ -417,7 +371,7 @@ class Enroll_Means(tk.Frame):
               
 
 
-# Frame for authentication with specific means (e.g., face, fingerprint, iris)
+# Frame for authentication with specific means (e.g., face)
 class Auth_Means(tk.Frame):
     mean = ""
     def __init__(self, parent, controller, means=fr"{getPath('iris.jpg')}"):
@@ -439,16 +393,36 @@ class Auth_Means(tk.Frame):
         self.canvas.create_image(0, 0, anchor='nw', image=self.image_tk)
         self.bind('<Configure>', lambda event, image = self.image_original, canva = self.canvas: controller.show_full_image(event, image, canva))
 
+        # Variables for user input
+        # global Text_Area1, Text_Area2, error_label 
+        self.Text_Area1 = StringVar()
+        self.Text_Area2 = StringVar()
+
         # Drawing text on the image
         draw = ImageDraw.Draw(self.image_original)
-        point0 = 85,53
+        point0 = 118,53
         point1 = 450,250
         point2 = 450,350
         color0 = "lightblue"
         color="cyan"
-        color1 = "red"
 
-        draw.text(point0, "Checking on you", color, font=ImageFont.load_default())
+        draw.text(point0, "Enrolling you", color, font=ImageFont.load_default(20))
+
+        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default(20))
+
+        # Entry widget for name, centered horizontally
+        Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
+        Input1.place(relx=0.5, rely=0.45, anchor='center')
+
+        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default(20))
+
+        # Entry widget for first name, centered horizontally
+        Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
+        Input2.place(relx=0.5, rely=0.55, anchor='center')
+
+        # Label for displaying error message
+        self.error_label = Label(self, fg="red", font=("Helvetica", 12, "italic"), bg="black")
+        self.error_label.place(relx=0.5, rely=0.6, anchor='center')
 
         # Submit button, centered horizontally
         button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
@@ -469,15 +443,9 @@ class Auth_Means(tk.Frame):
 
     def compare_biometry(self, controller):
         print('means_compare', self.mean)
-        if "face.jpg" in self.mean:
-            face_comp = FaceRecognition()
-            face_comp.run_recognition()
-        elif "finger.jpg" in self.mean:
-            controller.show_frame(Temporary)
-        elif "iris.jpg" in self.mean:
-            controller.show_frame(Temporary)
-        elif "voice.jpg" in self.mean:
-            controller.show_frame(Temporary)
+        face_comp = FaceRecognition()
+        face_comp.run_recognition()
+
 
 # Frame for undone functionalities
 class Temporary(tk.Frame):
@@ -505,7 +473,7 @@ class Temporary(tk.Frame):
         point0 = 10,40
         color="black"
 
-        draw.text(point0, "Sorry, we're still working on this !", color, font=ImageFont.load_default())
+        draw.text(point0, "Sorry, we're still working on this !", color, font=ImageFont.load_default(20))
         
         # Submit button, centered horizontally
         button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="white", font=("Helvetica", 14, "bold"),)
