@@ -6,43 +6,38 @@ from face_processing import *
 import mysql.connector
 from datetime import datetime
 import speech_recognition as sr
+from bdd import DatabaseHandler
 
-
-# Database configuration
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'root',
-    'database': 'biometry_db',
+    'password': '',
+    'database': 'biometrie',
 }
+try:
+    conn = DatabaseHandler("localhost", "root", "", "biometrie")
+    cursor = conn.get_cursor()
 
-# Function to insert an employee into the existing 'employees' table
-def add_user(complete_name, FacialData, FingerData, IrisData, VoiceData, LastUpdate):
-    connection = None  # Initialize connection variable
+    query = """
+        CREATE TABLE IF NOT EXISTS membres (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            nom VARCHAR(255),
+            prenom VARCHAR(255),
+            email VARCHAR(255),
+            FacialData VARCHAR(255),
+            lastAccess date
+        )
+    """
+    conn.execute_query(query)
 
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
+    print("Table créée avec succès et données insérées.")
 
-        # Insert data into the 'employees' table
-        cursor.execute("""
-            INSERT INTO biometrics (Name, FacialData, FingerData, IrisData, VoiceData, LastUpdated)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (complete_name, FacialData, FingerData, IrisData, VoiceData, LastUpdate))
+finally:
+    if 'conn' in locals():
+        conn.close()
+        print("Connexion à la base de données fermée.")
 
-        connection.commit()
 
-        print(f"User '{complete_name}' added successfully.")
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-
-    finally:
-        if connection is not None and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-# Get image file path relatively
 def getPath(imfile, ipath="images"):
     # Get the current directory of the script
     current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -68,9 +63,12 @@ def center(win):
     win.deiconify()
 
 
-# Main Application Class
+# Main Application
 class BiometryApp(tk.Tk):
     def __init__(self, *args, **kwargs):
+        # Initialisation bdd
+        # DatabaseHandler("localhost", "user", "password", "mydatabase")        
+
         # Initializes the main application window
         tk.Tk.__init__(self, *args, **kwargs)
 
@@ -163,7 +161,7 @@ class BiometryApp(tk.Tk):
         frame.tkraise()
 
 
-# Start Page Frame Class
+# Start Page Frame
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         # Start Page frame with options to enroll and authenticate
@@ -202,7 +200,7 @@ class StartPage(tk.Frame):
         auth_label.place(relx=0.51, rely=0.49)
         auth_label.bind("<Button-1>", lambda event: controller.show_auth_frame())
 
-# Second Window Frame (Page 1) - Enrollment Frame Class
+# Second Window Frame (Page 1) - Enrollment Frame
 class Enroll(tk.Frame):
     def __init__(self, parent, controller):
         # Enrollment frame with options for different biometric means
@@ -236,7 +234,7 @@ class Enroll(tk.Frame):
         button.place(relx=0.5, rely=0.8, anchor='center')
 
 
-# Third Window Frame (Page 2) - Authentication Frame Class
+# Third Window Frame (Page 2) - Authentication Frame
 class Auth(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -294,44 +292,50 @@ class Enroll_Means(tk.Frame):
         self.bind('<Configure>', lambda event, image = self.image_original, canva = self.canvas: controller.show_full_image(event, image, canva))
 
         # Variables for user input
-        # global Text_Area1, Text_Area2, error_label 
         self.Text_Area1 = StringVar()
         self.Text_Area2 = StringVar()
+        self.Text_Area3 = StringVar()
     
         # Drawing text on the image
         draw = ImageDraw.Draw(self.image_original)
         point0 = 118,53
-        point1 = 450,250
-        point2 = 450,350
+        point1 = 430,200
+        point2 = 430,300
+        point3 = 430,400
         color0 = "lightblue"
         color="cyan"
-        color1 = "red"
 
         draw.text(point0, "Enrolling you", color, font=ImageFont.load_default(20))
 
-        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default(20))
+        # Entry widget for name
+        draw.text(point1, "Enter your last name", color0, font=ImageFont.load_default(20))
 
-        # Entry widget for name, centered horizontally
         Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
-        Input1.place(relx=0.5, rely=0.45, anchor='center')
+        Input1.place(relx=0.5, rely=0.4, anchor='center')
 
-        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default(20))
+        # Entry widget for first name
+        draw.text(point2, "Enter your first name", color0, font=ImageFont.load_default(20))
 
-        # Entry widget for first name, centered horizontally
         Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
-        Input2.place(relx=0.5, rely=0.55, anchor='center')
+        Input2.place(relx=0.5, rely=0.5, anchor='center')
+
+        # Entry widget for email
+        draw.text(point3, "Enter your email", color0, font=ImageFont.load_default(20))
+
+        Input3 = Entry(self, textvariable=self.Text_Area3, font=("Helvetica", 12), width=30)
+        Input3.place(relx=0.5, rely=0.6, anchor='center')
 
         # Label for displaying error message
         self.error_label = Label(self, fg="red", font=("Helvetica", 12, "italic"), bg="black")
-        self.error_label.place(relx=0.5, rely=0.6, anchor='center')
+        self.error_label.place(relx=0.5, rely=0.7, anchor='center')
 
-        # Submit button, centered horizontally
+        # Submit button
         button = Button(self, text="Submit", command= lambda: self.enroll_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
-        button.place(relx=0.55, rely=0.7, anchor='center')
+        button.place(relx=0.55, rely=0.8, anchor='center')
 
         # Cancel button, centered horizontally
         button = Button(self, text="Return", command=lambda: controller.show_enroll_frame(), bg="red", font=("Helvetica", 14, "bold"),)
-        button.place(relx=0.45, rely=0.7, anchor='center')
+        button.place(relx=0.45, rely=0.8, anchor='center')
 
     def update_means(self, means):
         # Update the "Top" image based on the selected means
@@ -344,18 +348,19 @@ class Enroll_Means(tk.Frame):
 
 
     def enroll_biometry(self, controller):
-        # Retrieve values from entry widgets
-        lname = self.Text_Area1.get()
-        fname = self.Text_Area2.get()
-        complete_name = f"{fname.upper()} {lname.title()}"
+        # recup des données
+        nom = self.Text_Area1.get()
+        prenom = self.Text_Area2.get()
+        email = self.Text_Area3.get()
+
         # Check if both fields are filled
-        if not lname or not fname:
+        if not nom or not prenom or not email:
             # Display an error message (you can customize this part)
-            self.error_label.config(text="Please fill in both fields", fg="red", font=("Helvetica", 12, "bold"))
+            self.error_label.config(text="Please fill in all fields", fg="red", font=("Helvetica", 12, "bold"))
         else:
             # If both fields are filled, proceed with creating the new window
             self.error_label.config(text="")  # Clear the error message
-            name = (lname.replace(' ', '') + "_" + fname.replace(' ', '')) + ".jpg"
+            name = (nom.replace(' ', '') + "_" + prenom.replace(' ', '')) + ".jpg"
             filename = name.lower()
 
             if "face.jpg" in self.mean:
@@ -367,7 +372,7 @@ class Enroll_Means(tk.Frame):
                     image_data = image_file.read()
                 # Get the current date and time
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                add_user(complete_name, image_data, None, None, None, current_timestamp) 
+                conn.addUser(nom, prenom, image_data, None, None, None, current_timestamp) 
               
 
 
@@ -397,40 +402,49 @@ class Auth_Means(tk.Frame):
         # global Text_Area1, Text_Area2, error_label 
         self.Text_Area1 = StringVar()
         self.Text_Area2 = StringVar()
+        self.Text_Area3 = StringVar()
 
         # Drawing text on the image
         draw = ImageDraw.Draw(self.image_original)
         point0 = 118,53
-        point1 = 450,250
-        point2 = 450,350
+        point1 = 430,200
+        point2 = 430,300
+        point3 = 430,400
         color0 = "lightblue"
         color="cyan"
 
         draw.text(point0, "Enrolling you", color, font=ImageFont.load_default(20))
 
-        draw.text(point1, "Enter your LastName", color0, font=ImageFont.load_default(20))
 
-        # Entry widget for name, centered horizontally
+        # Entry widget for name
+        draw.text(point1, "Enter your last name", color0, font=ImageFont.load_default(20))
+
         Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
-        Input1.place(relx=0.5, rely=0.45, anchor='center')
+        Input1.place(relx=0.5, rely=0.4, anchor='center')
 
-        draw.text(point2, "Enter your FirstName", color0, font=ImageFont.load_default(20))
+        # Entry widget for first name
+        draw.text(point2, "Enter your first name", color0, font=ImageFont.load_default(20))
 
-        # Entry widget for first name, centered horizontally
         Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
-        Input2.place(relx=0.5, rely=0.55, anchor='center')
+        Input2.place(relx=0.5, rely=0.5, anchor='center')
 
-        # Label for displaying error message
+        # Entry widget for email
+        draw.text(point3, "Enter your email", color0, font=ImageFont.load_default(20))
+
+        Input3 = Entry(self, textvariable=self.Text_Area3, font=("Helvetica", 12), width=30)
+        Input3.place(relx=0.5, rely=0.6, anchor='center')
+
+        # Messages d'erreur
         self.error_label = Label(self, fg="red", font=("Helvetica", 12, "italic"), bg="black")
-        self.error_label.place(relx=0.5, rely=0.6, anchor='center')
+        self.error_label.place(relx=0.5, rely=0.7, anchor='center')
 
-        # Submit button, centered horizontally
+        # Submit button
         button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
-        button.place(relx=0.55, rely=0.7, anchor='center')
+        button.place(relx=0.55, rely=0.8, anchor='center')
 
-        # Cancel button, centered horizontally
+        # Cancel button
         button = Button(self, text="Return", command=lambda: controller.show_auth_frame(), bg="red", font=("Helvetica", 14, "bold"),)
-        button.place(relx=0.45, rely=0.7, anchor='center')
+        button.place(relx=0.45, rely=0.8, anchor='center')
 
     def update_means(self, means):
         # Update the "Top" image based on the selected means
