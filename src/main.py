@@ -14,28 +14,28 @@ db_config = {
     'password': '',
     'database': 'biometrie',
 }
-try:
-    conn = DatabaseHandler("localhost", "root", "", "biometrie")
-    cursor = conn.get_cursor()
+# try:
+conn = DatabaseHandler("localhost", "root", "", "biometrie")
+cursor = conn.get_cursor()
 
-    query = """
-        CREATE TABLE IF NOT EXISTS membres (
-            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            nom VARCHAR(255),
-            prenom VARCHAR(255),
-            email VARCHAR(255),
-            FacialData VARCHAR(255),
-            lastAccess date
-        )
-    """
-    conn.execute_query(query)
+query = """
+    CREATE TABLE IF NOT EXISTS membres (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        nom VARCHAR(255),
+        prenom VARCHAR(255),
+        email VARCHAR(255),
+        FacialData LONGBLOB,
+        lastAccess date
+    )
+"""
+conn.execute_query(query)
 
-    print("Table créée avec succès et données insérées.")
+print("Table créée avec succès et données insérées.")
 
-finally:
-    if 'conn' in locals():
-        conn.close()
-        print("Connexion à la base de données fermée.")
+# finally:
+#     if 'conn' in locals():
+#         conn.close()
+#         print("Connexion à la base de données fermée.")
 
 
 def getPath(imfile, ipath="images"):
@@ -372,6 +372,7 @@ class Enroll_Means(tk.Frame):
                     image_data = image_file.read()
                 # Get the current date and time
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print(current_timestamp)
                 conn.addUser(nom, prenom, email, image_data, current_timestamp) 
               
 

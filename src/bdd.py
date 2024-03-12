@@ -43,38 +43,14 @@ class DatabaseHandler:
             print("Erreur lors de l'exécution de la requête :", err)
 
     # Ajout utilisateur
-    def addUser (self, id, nom, prenom, email, FacialData, lastAccess):
-        query = "INSERT INTO membres (id, nom, prenom, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s, %s, %s)"
-        values = (id, nom, prenom, email, FacialData, lastAccess)
+    def addUser (self, nom, prenom, email, FacialData, lastAccess):
+        query = "INSERT INTO membres (nom, prenom, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s, %s)"
+        values = (nom, prenom, email, FacialData, lastAccess)
         cursor = self.connection.cursor()
         cursor.execute(query, values)
         self.connection.commit()
         cursor.close()
     
-    # def add_user(db_config, id, nom, prenom, email, FacialData, lastAccess):
-    #     connection = None 
-
-    #     try:
-    #         connection = mysql.connector.connect(**db_config)
-    #         cursor = connection.cursor()
-
-    #         cursor.execute("""
-    #             INSERT INTO membres (id, nom, prenom, email, FacialData, lastAccess)
-    #             VALUES (%s, %s, %s, %s, %s, %s)
-    #         """, (id, nom, prenom, email, FacialData, lastAccess))
-
-    #         connection.commit()
-
-    #         print(f"User '{nom}' '{prenom}' added successfully.")
-
-    #     except mysql.connector.Error as err:
-    #         print(f"Error: {err}")
-
-    #     finally:
-    #         if connection is not None and connection.is_connected():
-    #             cursor.close()
-    #             connection.close()
-
     def close(self):
         if self.connection.is_connected():
             self.connection.close()
