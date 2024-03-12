@@ -372,7 +372,7 @@ class Enroll_Means(tk.Frame):
                     image_data = image_file.read()
                 # Get the current date and time
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                conn.addUser(nom, prenom, image_data, None, None, None, current_timestamp) 
+                conn.addUser(nom, prenom, email, image_data, current_timestamp) 
               
 
 
