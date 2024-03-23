@@ -3,6 +3,7 @@ import os, sys
 import cv2
 import numpy as np
 import math
+import dlib
 
 
 # Get image file path relatively
@@ -25,7 +26,29 @@ def face_confidence(face_distance, face_match_threshold=0.6):
     else:
         value = (linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))) * 100
         return str(round(value, 2)) + "%"
-    
+
+def rect_to_bb(rect):
+	# take a bounding predicted by dlib and convert it
+	# to the format (x, y, w, h) as we would normally do
+	# with OpenCV
+	x = rect.left()
+	y = rect.top()
+	w = rect.right() - x
+	h = rect.bottom() - y
+	# return a tuple of (x, y, w, h)
+	return (x, y, w, h)
+
+def shape_to_np(shape, dtype="int"):
+	# initialize the list of (x, y)-coordinates
+	coords = np.zeros((68, 2), dtype=dtype)
+	# loop over the 68 facial landmarks and convert them
+	# to a 2-tuple of (x, y)-coordinates
+	for i in range(0, 68):
+		coords[i] = (shape.part(i).x, shape.part(i).y)
+	# return the list of (x, y)-coordinates
+	return coords
+
+
 
 class FaceRecognition:
     face_locations = []
@@ -52,6 +75,10 @@ class FaceRecognition:
         # Load the pre-trained face detection classifier
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
+        # Load the pre-trained facial landmark predictor
+        predictor_path = "src/shape_predictor_68_face_landmarks.dat"
+        predictor = dlib.shape_predictor(predictor_path)
+
         # open a window to show the video frame
         window_name = "Face Enrolling"
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
@@ -65,17 +92,6 @@ class FaceRecognition:
 
             # If an image is detected without any error, show result
             if result:
-
-                # Create a black rectangle to place the text over
-                cv2.rectangle(image, (0, 0), (640, 20), (0, 0, 255), -1)
-                # Display text
-                cv2.putText(image,self.instruction1, (215, 17), cv2.FONT_HERSHEY_SIMPLEX, .7, (0, 0, 0), 1,cv2.LINE_AA)
-                # Create a black rectangle to place the text over
-                cv2.rectangle(image, (0, 460), (640, 480), (0, 255, 0), -1)
-                # Display text
-                cv2.putText(image,self.instruction2, (200, 477), cv2.FONT_HERSHEY_SIMPLEX, .7, (0, 0, 0), 1,cv2.LINE_AA)
-                
-                
                 # Convert the image to grayscale for face detection
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -86,13 +102,26 @@ class FaceRecognition:
                 for (x, y, w, h) in faces:
                     cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-                # showing result
-                cv2.imshow("Face Enrolling", image)
-                 
-            key = cv2.waitKey(10)
-            # break the loop if  key 'e' is pressed or red cross button pressed
-            if key == 13 or key == 27:
-                break
+                    # Convert the OpenCV rectangle to a dlib rectangle
+                    dlib_rect = dlib.rectangle(int(x), int(y), int(x+w), int(y+h))
+
+                    # Detect the facial landmarks
+                    landmarks = predictor(gray, dlib_rect)
+
+                    # Draw the facial landmarks on the image
+                    for i in range(0, 68):
+                        x = landmarks.part(i).x
+                        y = landmarks.part(i).y
+                        cv2.circle(image, (x, y), 1, (0, 255, 0), -1)
+
+                # Display the video frame
+                cv2.imshow(window_name, image)
+
+
+                # Check for key press to exit
+                key = cv2.waitKey(10)
+                if key == 13 or key == 27:
+                    break
            
         if key==13:
             # saving the last captured frame in local storage
@@ -102,7 +131,6 @@ class FaceRecognition:
         # destroy the window
         cv2.destroyWindow(window_name)
 
-    
     def encode_faces(self):
         for image in os.listdir('biometries_data/faces'):
             face_image = face_recognition.load_image_file(f'biometries_data/faces/{image}')
@@ -119,7 +147,7 @@ class FaceRecognition:
             self.known_face_names.append(image)
 
         print(self.known_face_names)
-    
+
     def run_recognition(self):
         video_capture = cv2.VideoCapture(0)
 
@@ -190,6 +218,7 @@ class FaceRecognition:
 
         video_capture.release()
         cv2.destroyAllWindows()
+
 if __name__ == '__main__':
     fr = FaceRecognition()
     fr.enroll_face("runrun.jpg")

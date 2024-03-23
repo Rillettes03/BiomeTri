@@ -3,9 +3,7 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from face_processing import *
-import mysql.connector
 from datetime import datetime
-import speech_recognition as sr
 from bdd import DatabaseHandler
 
 db_config = {
