@@ -5,6 +5,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from face_processing import *
 from datetime import datetime
 from bdd import DatabaseHandler
+import re
 
 db_config = {
     'host': 'localhost',
@@ -352,10 +353,11 @@ class Enroll_Means(tk.Frame):
         prenom = self.Text_Area2.get()
         email = self.Text_Area3.get()
 
-        # Check if both fields are filled
         if not nom or not prenom or not email:
-            # Display an error message (you can customize this part)
             self.error_label.config(text="Please fill in all fields", fg="red", font=("Helvetica", 12, "bold"))
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            self.error_label.config(text="Invalid email format", fg="red", font=("Helvetica", 12, "italic"))
+            return
         else:
             # If both fields are filled, proceed with creating the new window
             self.error_label.config(text="")  # Clear the error message
