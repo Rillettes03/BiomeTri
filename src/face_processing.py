@@ -89,6 +89,7 @@ class FaceRecognition:
         while True:
             # reading the input using the camera
             result, image = cam.read()
+            image2 = image
 
             # If an image is detected without any error, show result
             if result:
@@ -126,7 +127,7 @@ class FaceRecognition:
         if key==13:
             # saving the last captured frame in local storage
             image_path = fr"{getPath('faces','biometries_data')}\{filename}"
-            cv2.imwrite(image_path, image)
+            cv2.imwrite(image_path, image2)
 
         # destroy the window
         cv2.destroyWindow(window_name)
