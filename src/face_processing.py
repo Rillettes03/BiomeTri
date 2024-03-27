@@ -89,10 +89,17 @@ class FaceRecognition:
         while True:
             # reading the input using the camera
             result, image = cam.read()
-            image2 = image
+            image2 = image.copy()
 
             # If an image is detected without any error, show result
             if result:
+                # Create a black rectangle to place the text over
+                cv2.rectangle(image, (0, 0), (640, 20), (0, 0, 255), -1)
+                cv2.putText(image,self.instruction1, (215, 17), cv2.FONT_HERSHEY_SIMPLEX, .7, (0, 0, 0), 1,cv2.LINE_AA)
+                # Create a black rectangle to place the text over
+                cv2.rectangle(image, (0, 460), (640, 480), (0, 255, 0), -1)
+                cv2.putText(image,self.instruction2, (200, 477), cv2.FONT_HERSHEY_SIMPLEX, .7, (0, 0, 0), 1,cv2.LINE_AA)
+
                 # Convert the image to grayscale for face detection
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -103,7 +110,6 @@ class FaceRecognition:
                 for (x, y, w, h) in faces:
                     cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-                    # Convert the OpenCV rectangle to a dlib rectangle
                     dlib_rect = dlib.rectangle(int(x), int(y), int(x+w), int(y+h))
 
                     # Detect the facial landmarks
@@ -126,7 +132,7 @@ class FaceRecognition:
            
         if key==13:
             # saving the last captured frame in local storage
-            image_path = fr"{getPath('faces','biometries_data')}\{filename}"
+            image_path = os.path.join("biometries_data", "faces", filename)
             cv2.imwrite(image_path, image2)
 
         # destroy the window
@@ -183,13 +189,13 @@ class FaceRecognition:
                     confidence = 'Unknown'
 
                     face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
+                    print(f" face distance : {face_distances}")
                     best_match_index = np.argmin(face_distances)
 
                     if matches[best_match_index]:
                         name = self.known_face_names[best_match_index]
                         confidence = face_confidence(face_distances[best_match_index])
 
-                    
                     self.face_names.append(f'{name} ({confidence})')
             self.process_current_frame = not self.process_current_frame
 

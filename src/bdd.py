@@ -55,7 +55,20 @@ class DatabaseHandler:
         if self.connection.is_connected():
             self.connection.close()
 
-# # Example usage:
-# db_handler = DatabaseHandler("localhost", "user", "password", "mydatabase")
-# db_handler.insert_user("john_doe", "john@example.com")
-# db_handler.close()
+
+    def check_email_exists(self, email):
+        try:
+            cursor = self.connection.cursor()
+
+            query = "SELECT COUNT(*) FROM membres WHERE email = %s"
+            cursor.execute(query, (email,))
+            result = cursor.fetchone()
+
+            if result[0] > 0:
+                return True  
+            else:
+                return False 
+        except mysql.connector.Error as err:
+            print("Erreur lors de la vérification de l'e-mail dans la base de données :", err)
+            return False  
+

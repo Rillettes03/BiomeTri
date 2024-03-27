@@ -358,6 +358,10 @@ class Enroll_Means(tk.Frame):
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             self.error_label.config(text="Invalid email format", fg="red", font=("Helvetica", 12, "italic"))
             return
+        if conn.check_email_exists(email):
+            self.error_label.config(text="Email already exists", fg="red", font=("Helvetica", 12, "italic"))
+            return
+    
         else:
             # If both fields are filled, proceed with creating the new window
             self.error_label.config(text="")  # Clear the error message
@@ -375,6 +379,7 @@ class Enroll_Means(tk.Frame):
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 print(current_timestamp)
                 conn.addUser(nom, prenom, email, image_data, current_timestamp) 
+                controller.show_frame(StartPage)
               
 
 
@@ -402,9 +407,9 @@ class Auth_Means(tk.Frame):
 
         # Variables for user input
         # global Text_Area1, Text_Area2, error_label 
-        self.Text_Area1 = StringVar()
-        self.Text_Area2 = StringVar()
-        self.Text_Area3 = StringVar()
+        # self.Text_Area1 = StringVar()
+        # self.Text_Area2 = StringVar()
+        # self.Text_Area3 = StringVar()
 
         # Drawing text on the image
         draw = ImageDraw.Draw(self.image_original)
@@ -415,30 +420,30 @@ class Auth_Means(tk.Frame):
         color0 = "lightblue"
         color="cyan"
 
-        draw.text(point0, "Enrolling you", color, font=ImageFont.load_default(20))
+        draw.text(point0, "Checking on you", color, font=ImageFont.load_default(20))
 
 
-        # Entry widget for name
-        draw.text(point1, "Enter your last name", color0, font=ImageFont.load_default(20))
+        # # Entry widget for name
+        # draw.text(point1, "Enter your last name", color0, font=ImageFont.load_default(20))
 
-        Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
-        Input1.place(relx=0.5, rely=0.4, anchor='center')
+        # Input1 = Entry(self, textvariable=self.Text_Area1, font=("Helvetica", 12), width=30)
+        # Input1.place(relx=0.5, rely=0.4, anchor='center')
 
-        # Entry widget for first name
-        draw.text(point2, "Enter your first name", color0, font=ImageFont.load_default(20))
+        # # Entry widget for first name
+        # draw.text(point2, "Enter your first name", color0, font=ImageFont.load_default(20))
 
-        Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
-        Input2.place(relx=0.5, rely=0.5, anchor='center')
+        # Input2 = Entry(self, textvariable=self.Text_Area2, font=("Helvetica", 12), width=30)
+        # Input2.place(relx=0.5, rely=0.5, anchor='center')
 
-        # Entry widget for email
-        draw.text(point3, "Enter your email", color0, font=ImageFont.load_default(20))
+        # # Entry widget for email
+        # draw.text(point3, "Enter your email", color0, font=ImageFont.load_default(20))
 
-        Input3 = Entry(self, textvariable=self.Text_Area3, font=("Helvetica", 12), width=30)
-        Input3.place(relx=0.5, rely=0.6, anchor='center')
+        # Input3 = Entry(self, textvariable=self.Text_Area3, font=("Helvetica", 12), width=30)
+        # Input3.place(relx=0.5, rely=0.6, anchor='center')
 
-        # Messages d'erreur
-        self.error_label = Label(self, fg="red", font=("Helvetica", 12, "italic"), bg="black")
-        self.error_label.place(relx=0.5, rely=0.7, anchor='center')
+        # # Messages d'erreur
+        # self.error_label = Label(self, fg="red", font=("Helvetica", 12, "italic"), bg="black")
+        # self.error_label.place(relx=0.5, rely=0.7, anchor='center')
 
         # Submit button
         button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="#9ACD32", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
