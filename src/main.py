@@ -3,10 +3,9 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from face_processing import *
-import mysql.connector
 from datetime import datetime
-import speech_recognition as sr
 from bdd import DatabaseHandler
+import re
 
 db_config = {
     'host': 'localhost',
@@ -230,9 +229,10 @@ class Enroll(tk.Frame):
         face_label.bind("<Button-1>", lambda event: controller.show_enroll_means_frame(enroll_image_face))
 
         # Submit button, centered horizontally
-        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="red", font=("Helvetica", 14, "bold"))
-        button.place(relx=0.5, rely=0.8, anchor='center')
+        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="#ff6b6b", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
+        button.config(borderwidth=0, highlightthickness=0, padx=20, pady=10)
 
+        button.place(relx=0.5, rely=0.8, anchor='center')
 
 # Third Window Frame (Page 2) - Authentication Frame
 class Auth(tk.Frame):
@@ -263,7 +263,7 @@ class Auth(tk.Frame):
         face_label.bind("<Button-1>", lambda event: controller.show_auth_means_frame(fr"{getPath('face.jpg')}"))
 
         # Submit button, centered horizontally
-        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="red", font=("Helvetica", 14, "bold"))
+        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="#ff6b6b", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.5, rely=0.8, anchor='center')
 
     
@@ -330,11 +330,11 @@ class Enroll_Means(tk.Frame):
         self.error_label.place(relx=0.5, rely=0.7, anchor='center')
 
         # Submit button
-        button = Button(self, text="Submit", command= lambda: self.enroll_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
+        button = Button(self, text="Submit", command=lambda: self.enroll_biometry(controller), bg="#ff6b6b", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.55, rely=0.8, anchor='center')
 
         # Cancel button, centered horizontally
-        button = Button(self, text="Return", command=lambda: controller.show_enroll_frame(), bg="red", font=("Helvetica", 14, "bold"),)
+        button = Button(self, text="Return", command=lambda: controller.show_enroll_frame(), bg="#9ACD32", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.45, rely=0.8, anchor='center')
 
     def update_means(self, means):
@@ -353,10 +353,11 @@ class Enroll_Means(tk.Frame):
         prenom = self.Text_Area2.get()
         email = self.Text_Area3.get()
 
-        # Check if both fields are filled
         if not nom or not prenom or not email:
-            # Display an error message (you can customize this part)
             self.error_label.config(text="Please fill in all fields", fg="red", font=("Helvetica", 12, "bold"))
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            self.error_label.config(text="Invalid email format", fg="red", font=("Helvetica", 12, "italic"))
+            return
         else:
             # If both fields are filled, proceed with creating the new window
             self.error_label.config(text="")  # Clear the error message
@@ -440,11 +441,11 @@ class Auth_Means(tk.Frame):
         self.error_label.place(relx=0.5, rely=0.7, anchor='center')
 
         # Submit button
-        button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="green", font=("Helvetica", 14, "bold"),)
+        button = Button(self, text="Submit", command=lambda: self.compare_biometry(controller), bg="#9ACD32", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.55, rely=0.8, anchor='center')
 
         # Cancel button
-        button = Button(self, text="Return", command=lambda: controller.show_auth_frame(), bg="red", font=("Helvetica", 14, "bold"),)
+        button = Button(self, text="Return", command=lambda: controller.show_auth_frame(), bg="#ff6b6b", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.45, rely=0.8, anchor='center')
 
     def update_means(self, means):
@@ -491,7 +492,7 @@ class Temporary(tk.Frame):
         draw.text(point0, "Sorry, we're still working on this !", color, font=ImageFont.load_default(20))
         
         # Submit button, centered horizontally
-        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="white", font=("Helvetica", 14, "bold"),)
+        button = Button(self, text="Return", command=lambda: controller.show_frame(StartPage), bg="#ff6b6b", fg="white", font=("Helvetica", 14, "bold"), relief=tk.FLAT)
         button.place(relx=0.5, rely=0.9, anchor='center')
 
 # Driver Code
