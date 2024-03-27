@@ -36,6 +36,17 @@ print("Table créée avec succès et données insérées.")
 #         conn.close()
 #         print("Connexion à la base de données fermée.")
 
+#On prends nom et prenom pour fair un id unique
+def generate_id(nom, prenom):
+    # Concatenate the nom and prenom
+    full_name = nom + prenom
+    # Create a hash object
+    hash_object = hash.sha256()
+    # Update hash object with the concatenated full_name
+    hash_object.update(full_name.encode())
+    # Get the hexadecimal digest of the hash
+    hashed_id = hash_object.hexdigest()
+    return hashed_id
 
 def getPath(imfile, ipath="images"):
     # Get the current directory of the script
