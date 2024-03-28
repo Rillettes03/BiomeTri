@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import math
 import dlib
+from bdd import DatabaseHandler
 
 
 # Get image file path relatively
@@ -139,21 +140,19 @@ class FaceRecognition:
         cv2.destroyWindow(window_name)
 
     def encode_faces(self):
-        for image in os.listdir('biometries_data/faces'):
-            face_image = face_recognition.load_image_file(f'biometries_data/faces/{image}')
+        conn = DatabaseHandler("localhost", "root", "", "biometrie")
+        images = conn.getFaces()
+        membres = conn.getMembres()
 
-            face_encodings = face_recognition.face_encodings(face_image)
-
+        for image ,(nom, prenom) in zip(images, membres) :
+            face_encodings = face_recognition.face_encodings(image)
             if face_encodings:
                 face_encoding = face_encodings[0]
             else:
-                # Handle the case when no face is found in the image
                 print("No face found in the image")
 
             self.known_face_encodings.append(face_encoding)
-            self.known_face_names.append(image)
-
-        print(self.known_face_names)
+            self.known_face_names.append(f"{nom} {prenom}")
 
     def run_recognition(self):
         video_capture = cv2.VideoCapture(0)
@@ -189,7 +188,7 @@ class FaceRecognition:
                     confidence = 'Unknown'
 
                     face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
-                    print(f" face distance : {face_distances}")
+                    # print(f" face distance : {face_distances}")
                     best_match_index = np.argmin(face_distances)
 
                     if matches[best_match_index]:
@@ -212,9 +211,9 @@ class FaceRecognition:
                 else:
                     rect_color = (0, 255, 0)  # Green for known faces
 
-                cv2.rectangle(frame, (left, top), (right, bottom), rect_color, 2)
-                cv2.rectangle(frame, (left, bottom-35), (right, bottom), rect_color, -1)
-                cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
+                cv2.rectangle(frame, (left-10, top), (right+10, bottom+65), rect_color, 2)
+                cv2.rectangle(frame, (left-10, bottom+35), (right+10, bottom+65), rect_color, -1)
+                cv2.putText(frame, name, (left-4, bottom+59), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
 
             cv2.imshow("Face Recognition", frame)
             

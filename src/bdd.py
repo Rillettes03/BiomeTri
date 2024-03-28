@@ -1,4 +1,6 @@
 import mysql.connector
+import cv2
+import numpy as np
 
 class DatabaseHandler:
     def __init__(self, host, user, password, database):
@@ -71,4 +73,29 @@ class DatabaseHandler:
         except mysql.connector.Error as err:
             print("Erreur lors de la vérification de l'e-mail dans la base de données :", err)
             return False  
+    
+    def getFaces(self):
+        cursor = self.connection.cursor()
+        
+        query = "SELECT FacialData FROM membres"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        faces = []
+        for row in rows:
+            facial_data = row[0]
+            nparr = np.frombuffer(facial_data, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            faces.append(image)
+
+        cursor.close()
+        return faces
+    
+    def getMembres(self):
+        cursor = self.connection.cursor()
+        query = "SELECT nom, prenom FROM membres"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        membres = [(row[0], row[1]) for row in rows]
+        return membres
 

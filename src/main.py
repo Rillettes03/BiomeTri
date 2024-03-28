@@ -31,11 +31,6 @@ conn.execute_query(query)
 
 print("Table créée avec succès et données insérées.")
 
-# finally:
-#     if 'conn' in locals():
-#         conn.close()
-#         print("Connexion à la base de données fermée.")
-
 #On prends nom et prenom pour fair un id unique
 def generate_id(nom, prenom):
     # Concatenate the nom and prenom
@@ -76,9 +71,6 @@ def center(win):
 # Main Application
 class BiometryApp(tk.Tk):
     def __init__(self, *args, **kwargs):
-        # Initialisation bdd
-        # DatabaseHandler("localhost", "user", "password", "mydatabase")        
-
         # Initializes the main application window
         tk.Tk.__init__(self, *args, **kwargs)
 
@@ -382,7 +374,7 @@ class Enroll_Means(tk.Frame):
             if "face.jpg" in self.mean:
                 face_en = FaceRecognition()
                 face_en.enroll_face(filename)
-                image_path = fr"{getPath('faces','biometries_data')}\{filename}"
+                image_path = os.path.join("biometries_data", "faces", filename)
                 # Read the image file
                 with open(image_path, 'rb') as image_file:
                     image_data = image_file.read()
