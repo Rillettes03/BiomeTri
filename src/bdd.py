@@ -46,8 +46,10 @@ class DatabaseHandler:
 
     # Ajout utilisateur
     def addUser (self, nom, prenom, email, FacialData, lastAccess):
-        query = "INSERT INTO membres (nom, prenom, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s, %s)"
-        values = (nom, prenom, email, FacialData, lastAccess)
+        # query = "INSERT INTO membres (nom, prenom, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s, %s)"
+        # values = (nom, prenom, email, FacialData, lastAccess)
+        query = "INSERT INTO membres (id, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s)"
+        values = (id, email, FacialData, lastAccess)
         cursor = self.connection.cursor()
         cursor.execute(query, values)
         self.connection.commit()

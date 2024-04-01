@@ -381,6 +381,7 @@ class Enroll_Means(tk.Frame):
                 # Get the current date and time
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 print(current_timestamp)
+                id = generate_id(nom, prenom)
                 conn.addUser(nom, prenom, email, image_data, current_timestamp) 
                 controller.show_frame(StartPage)
               
