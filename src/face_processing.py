@@ -124,14 +124,15 @@ class FaceRecognition:
                         cv2.circle(image, (x, y), 1, (0, 255, 0), -1)
 
                 # Display the video frame
-                cv2.imshow(window_name, face_roi)
+                cv2.imshow(window_name, image)
 
-
+                image2 = face_roi.copy()
+                
                 # Check for key press to exit
                 key = cv2.waitKey(10)
                 if key == 13 or key == 27:
                     break
-            image2 = face_roi.copy()
+            
 
         if key==13:
             # saving the last captured frame in local storage
