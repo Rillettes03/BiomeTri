@@ -5,6 +5,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from face_processing import *
 from datetime import datetime
 from bdd import DatabaseHandler
+import hashlib as hash
 import re
 
 db_config = {
@@ -19,9 +20,7 @@ cursor = conn.get_cursor()
 
 query = """
     CREATE TABLE IF NOT EXISTS membres (
-        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        nom VARCHAR(255),
-        prenom VARCHAR(255),
+        id VARCHAR(255) NOT NULL PRIMARY KEY,
         email VARCHAR(255),
         FacialData LONGBLOB,
         lastAccess date
@@ -382,7 +381,7 @@ class Enroll_Means(tk.Frame):
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 print(current_timestamp)
                 id = generate_id(nom, prenom)
-                conn.addUser(nom, prenom, email, image_data, current_timestamp) 
+                conn.addUser(id,email, image_data, current_timestamp) 
                 controller.show_frame(StartPage)
               
 

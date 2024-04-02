@@ -45,11 +45,10 @@ class DatabaseHandler:
             print("Erreur lors de l'exécution de la requête :", err)
 
     # Ajout utilisateur
-    def addUser (self, nom, prenom, email, FacialData, lastAccess):
-        # query = "INSERT INTO membres (nom, prenom, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s, %s)"
-        # values = (nom, prenom, email, FacialData, lastAccess)
+    def addUser (self, id, email, FacialData, lastAccess):
         query = "INSERT INTO membres (id, email, FacialData, lastAccess) VALUES (%s, %s, %s, %s)"
         values = (id, email, FacialData, lastAccess)
+
         cursor = self.connection.cursor()
         cursor.execute(query, values)
         self.connection.commit()
@@ -95,9 +94,9 @@ class DatabaseHandler:
     
     def getMembres(self):
         cursor = self.connection.cursor()
-        query = "SELECT nom, prenom FROM membres"
+        query = "SELECT id FROM membres"
         cursor.execute(query)
         rows = cursor.fetchall()
-        membres = [(row[0], row[1]) for row in rows]
+        membres = [row[0] for row in rows]
         return membres
 

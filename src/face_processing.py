@@ -90,7 +90,6 @@ class FaceRecognition:
         while True:
             # reading the input using the camera
             result, image = cam.read()
-            image2 = image.copy()
 
             # If an image is detected without any error, show result
             if result:
@@ -110,7 +109,9 @@ class FaceRecognition:
                 # Draw rectangles around the detected faces
                 for (x, y, w, h) in faces:
                     cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
+                    border_size = 60
+                    face_roi = image[max(0, y - border_size):min(image.shape[0], y + h + border_size),
+                                    max(0, x - border_size):min(image.shape[1], x + w + border_size)]
                     dlib_rect = dlib.rectangle(int(x), int(y), int(x+w), int(y+h))
 
                     # Detect the facial landmarks
@@ -123,14 +124,15 @@ class FaceRecognition:
                         cv2.circle(image, (x, y), 1, (0, 255, 0), -1)
 
                 # Display the video frame
-                cv2.imshow(window_name, image)
+                cv2.imshow(window_name, face_roi)
 
 
                 # Check for key press to exit
                 key = cv2.waitKey(10)
                 if key == 13 or key == 27:
                     break
-           
+            image2 = face_roi.copy()
+
         if key==13:
             # saving the last captured frame in local storage
             image_path = os.path.join("biometries_data", "faces", filename)
@@ -144,7 +146,7 @@ class FaceRecognition:
         images = conn.getFaces()
         membres = conn.getMembres()
 
-        for image ,(nom, prenom) in zip(images, membres) :
+        for image ,(id) in zip(images, membres) :
             face_encodings = face_recognition.face_encodings(image)
             if face_encodings:
                 face_encoding = face_encodings[0]
@@ -152,7 +154,7 @@ class FaceRecognition:
                 print("No face found in the image")
 
             self.known_face_encodings.append(face_encoding)
-            self.known_face_names.append(f"{nom} {prenom}")
+            self.known_face_names.append(f"{id}")
 
     def run_recognition(self):
         video_capture = cv2.VideoCapture(0)
